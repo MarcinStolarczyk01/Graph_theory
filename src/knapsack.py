@@ -4,7 +4,7 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
-logging.basicConfig(level='INFO')
+logging.basicConfig(level="INFO")
 logger = logging.getLogger(__file__)
 
 BAG_VOLUME = 2500
@@ -48,26 +48,27 @@ def search_while(first_parent: list[int]):
             parent = child
             upgrades += 1
 
-
-
         parents_history[generation] = parent_volume
-        if len(set(parents_history[max(generation - 100, 0):generation + 1])) == 1 and generation > 3:
-            logger.info('The same parent for 100 generations, stopping the process...')
+        if (
+            len(set(parents_history[max(generation - 100, 0) : generation + 1])) == 1
+            and generation > 3
+        ):
+            logger.info("The same parent for 100 generations, stopping the process...")
             break
         generation += 1
 
-    logger.info(f"""
+    logger.info(
+        f"""
     Solution chromosome: {parent}
     Solution value:      {parent_volume}
     Upgrades:            {upgrades}
     Generations:         {generation}
-    Execution time       {time.time() - start}""")
-
-
+    Execution time       {time.time() - start}"""
+    )
 
     fig, ax = plt.subplots()
     ax.plot(parents_history[:generation], list(range(generation)))
-    plt.savefig('solution_convergence.png')
+    plt.savefig("solution_convergence.png")
 
     return parent, parent_volume, upgrades, generation
 
