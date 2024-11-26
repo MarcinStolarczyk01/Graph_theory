@@ -14,12 +14,13 @@ class ProcessScheduler:
         max_exec_time=90,
         tasks_num=100,
     ):
+        logger.info("Setting parameters.")
         self.coefficients = processors_coefficients
         self.min_exec_time = min_exec_time
         self.max_exec_time = max_exec_time
         self.tasks = self.generate_tasks(tasks_num)
 
-    def run(self, max_stagnation: int, max_time: float):
+    def run(self, max_stagnation: int, max_time: float) -> float:
         start = time.time()
         ancestor = self.generate_chromosome()
         ancestor_total_exec_time = self.calc_total_exec_time(ancestor)
@@ -27,12 +28,14 @@ class ProcessScheduler:
         upgrades = 0
         stagnation = 0
         generation = 0
+        logger.info("Starting optimization process...")
         while stagnation < max_stagnation and time.time() - start < max_time:
             offspring = self.mutate(ancestor)
             offspring_total_exec_time = self.calc_total_exec_time(offspring)
 
             if offspring_total_exec_time < ancestor_total_exec_time:
                 ancestor = offspring
+                ancestor_total_exec_time = self.calc_total_exec_time(ancestor)
                 upgrades += 1
                 stagnation = 0
             else:
@@ -40,17 +43,29 @@ class ProcessScheduler:
 
             generation += 1
 
-        asymptote = sum(self.tasks) / sum(self.coefficients)
-
+        processors_runtime = {
+            f"P{proc_idx}-{coefficient}: ": sum(
+                [
+                    self.tasks[idx]
+                    for idx, proc in enumerate(ancestor)
+                    if proc == proc_idx
+                ]
+            )
+            * coefficient
+            for proc_idx, coefficient in enumerate(self.coefficients)
+        }
+        logger.info("Optimization process finished.")
         logger.info(
             f"""\n
-        Asymptote:           {asymptote:.2f}
-        Solution chromosome: {ancestor}
-        Solution value:      {ancestor_total_exec_time} sec
-        Upgrades:            {upgrades}
-        Generations:         {generation}
-        Execution time       {(time.time() - start):.2f} sec"""
-        )
+{10*'='}RESULTS{10*'='}
+Processors runtimes: {processors_runtime}
+Solution chromosome: {ancestor}
+Solution value:      {ancestor_total_exec_time} sec
+Upgrades:            {upgrades}
+Generations:         {generation}
+Execution time       {(time.time() - start):.2f} sec"""
+)
+        return ancestor_total_exec_time/self.calc_theoretical_best_time()
 
     def calc_total_exec_time(self, chromosome: list[int]) -> float:
         times = []
@@ -77,6 +92,19 @@ class ProcessScheduler:
             ]
         )
 
+    def calc_theoretical_best_time(self) -> float:
+        total_workload = sum(self.tasks)
+        speeds = [1 / coefficient for coefficient in self.coefficients]
+        speed_sum = sum(speeds)
+
+        proportional_workload = [speed / speed_sum * total_workload for speed in speeds]
+
+        theoretical_times = [
+            workload * coefficient for workload, coefficient in zip(proportional_workload, self.coefficients)
+        ]
+
+        return max(theoretical_times)
+
     @staticmethod
     def mutate(chromosome: list[int]) -> list[int]:
         offspring = chromosome.copy()
@@ -89,6 +117,9 @@ class ProcessScheduler:
 
 
 if __name__ == "__main__":
-    ProcessScheduler(processors_coefficients=(1, 1.25, 1.5, 1.75), tasks_num=100).run(
-        max_stagnation=1000, max_time=10000000
-    )
+    optimum_percentage = []
+    for _ in range(10):
+        optimum_percentage.append(100*ProcessScheduler(processors_coefficients=(1, 1.25, 1.5, 1.75), tasks_num=100).run(
+            max_stagnation=int(1E6), max_time=10
+        ))
+    logger.info(f"\n\nPercentage_of_optimum: {optimum_percentage}")
