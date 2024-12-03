@@ -64,8 +64,8 @@ Solution value:      {ancestor_total_exec_time} sec
 Upgrades:            {upgrades}
 Generations:         {generation}
 Execution time       {(time.time() - start):.2f} sec"""
-)
-        return ancestor_total_exec_time/self.calc_theoretical_best_time()
+        )
+        return ancestor_total_exec_time / self.calc_theoretical_best_time()
 
     def calc_total_exec_time(self, chromosome: list[int]) -> float:
         times = []
@@ -100,7 +100,8 @@ Execution time       {(time.time() - start):.2f} sec"""
         proportional_workload = [speed / speed_sum * total_workload for speed in speeds]
 
         theoretical_times = [
-            workload * coefficient for workload, coefficient in zip(proportional_workload, self.coefficients)
+            workload * coefficient
+            for workload, coefficient in zip(proportional_workload, self.coefficients)
         ]
 
         return max(theoretical_times)
@@ -119,7 +120,10 @@ Execution time       {(time.time() - start):.2f} sec"""
 if __name__ == "__main__":
     optimum_percentage = []
     for _ in range(10):
-        optimum_percentage.append(100*ProcessScheduler(processors_coefficients=(1, 1.25, 1.5, 1.75), tasks_num=100).run(
-            max_stagnation=int(1E6), max_time=10
-        ))
+        optimum_percentage.append(
+            100
+            * ProcessScheduler(
+                processors_coefficients=(1, 1.25, 1.5, 1.75), tasks_num=100
+            ).run(max_stagnation=int(1e6), max_time=10)
+        )
     logger.info(f"\n\nPercentage_of_optimum: {optimum_percentage}")

@@ -9,12 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 class SalesmanNavigator:
-    def __init__(
-            self,
-            cities_num: int,
-            min_distance: int,
-            max_distance: int
-    ):
+    def __init__(self, cities_num: int, min_distance: int, max_distance: int):
         logger.info("Setting parameters.")
         self.cities_number: int = cities_num
         self.min_distance: int = min_distance
@@ -23,8 +18,7 @@ class SalesmanNavigator:
 
         self._records = np.zeros(shape=10**7, dtype=np.uint16)
 
-
-    def run(self, max_stagnation: int, max_time: float, plot:bool = True) -> float:
+    def run(self, max_stagnation: int, max_time: float, plot: bool = True) -> float:
         start = time.time()
         ancestor = self._generate_chromosome()
         ancestor_total_distance = self._cumulative_distance(ancestor)
@@ -45,7 +39,6 @@ class SalesmanNavigator:
             else:
                 stagnation += 1
 
-
             self._records[generation] = ancestor_total_distance
             generation += 1
 
@@ -60,16 +53,15 @@ Generations:         {generation}
 Execution time       {(time.time() - start):.2f} sec\n"""
         )
         if plot:
-            logger.info('Creating plot...')
+            logger.info("Creating plot...")
             records = self._records[self._records > 0]
             plt.plot([i for i in range(1, len(records) + 1)], records)
-            plt.xlabel('Generations')
-            plt.title('Salesman path VS solution generation')
-            plt.ylabel('Total distance [km]')
-            plt.savefig('Salesman.png')
+            plt.xlabel("Generations")
+            plt.title("Salesman path VS solution generation")
+            plt.ylabel("Total distance [km]")
+            plt.savefig("Salesman.png")
 
         return ancestor_total_distance
-
 
     def _cumulative_distance(self, chromosome: np.ndarray):
         indices = np.arange(chromosome.size - 1)
@@ -83,8 +75,9 @@ Execution time       {(time.time() - start):.2f} sec\n"""
         return cities
 
     def _generate_distances(self, cities_num: int) -> np.ndarray:
-        distances = np.random.randint(self.min_distance, self.max_distance, size=cities_num * cities_num).reshape(
-            cities_num, cities_num)
+        distances = np.random.randint(
+            self.min_distance, self.max_distance, size=cities_num * cities_num
+        ).reshape(cities_num, cities_num)
         np.fill_diagonal(distances, 0)
 
         return distances
