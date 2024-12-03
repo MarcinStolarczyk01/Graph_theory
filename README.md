@@ -9,3 +9,4 @@ In my case weight were replaced by volumes.
 The optimization target is to find **the combination of given items** described by a random volume that **their cumulative volume is lower or equal** to knapsack volume.
 ## Tasks allocation in multiprocessor RTS
 ## Traveling salesman problem
+## Two variable function maximum
